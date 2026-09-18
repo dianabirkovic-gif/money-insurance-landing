@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Накопичувальне страхування життя</title>
+<meta name="description" content="Захист життя та накопичення капіталу в одному продукті. Безкоштовна консультація і розрахунок.">
+
+<!--
+==========================================================================
+  ЗАГЛУШКИ ДЛЯ ЗАМІНИ (шукай по тексту):
+  Соцмережі             — посилання у футері (заміни на реальні)
+  Відгуки               — заміни на реальні відгуки клієнтів
+  RATE у <script>       — річна дохідність калькулятора (0.07 = 7% нетто для клієнта, складний %)
+  Telegram-сповіщення   — /api/lead.js + змінні оточення на Vercel (див. README.md)
+==========================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --navy:#0A2E52;
+    --blue:#12508F;
+    --blue-600:#0F4B87;
+    --blue-700:#0B3B6E;
+    --sky:#EAF2FB;
+    --bg:#F6F9FD;
+    --gold:#B5883A;
+    --gold-deep:#8F6A26;
+    --gold-soft:#F4EBD6;
+    --ink:#16273B;
+    --muted:#5B6B80;
+    --line:#DCE6F1;
+    --white:#FFFFFF;
+    --display:'Lora',Georgia,serif;
+    --sans:'Manrope',system-ui,-apple-system,sans-serif;
+    --shadow-sm:0 1px 2px rgba(10,46,82,.06),0 4px 14px rgba(10,46,82,.06);
+    --shadow-lg:0 12px 40px rgba(10,46,82,.14),0 2px 8px rgba(10,46,82,.06);
+    --r:14px;
+    --maxw:1180px;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);
+    font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.15;margin:0;color:var(--navy)}
+  p{margin:0}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .eyebrow{
+    font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--blue);display:inline-flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"";width:24px;height:2px;background:var(--gold);display:inline-block}
+
+  /* buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    font-family:var(--sans);font-weight:700;font-size:16px;cursor:pointer;
+    padding:15px 28px;border-radius:12px;border:1.5px solid transparent;
+    transition:transform .15s ease,box-shadow .2s ease,background .2s ease;white-space:nowrap;
+  }
+  .btn-primary{background:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(18,80,143,.28)}
+  .btn-primary:hover{background:var(--blue-600);transform:translateY(-2px);box-shadow:0 12px 26px rgba(18,80,143,.34)}
+  .btn-gold{background:var(--gold);color:#241a06}
+  .btn-gold:hover{background:var(--gold-deep);color:#fff;transform:translateY(-2px)}
+  .btn-ghost{background:transparent;color:var(--navy);border-color:var(--line)}
+  .btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+  .btn:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
+    outline:3px solid var(--gold);outline-offset:2px;border-radius:8px;
+  }
+
+  /* ===== header ===== */
+  header{
+    position:sticky;top:0;z-index:50;background:rgba(246,249,253,.86);
+    backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .logo{font-family:var(--display);font-weight:700;font-size:22px;color:var(--navy);letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+  .nav-links{display:flex;gap:30px;font-weight:600;font-size:15px;color:var(--muted)}
+  .nav-links a:hover{color:var(--blue)}
+  .nav-right{display:flex;align-items:center;gap:18px}
+  .nav-phone{font-weight:700;color:var(--navy);font-size:16px}
+  .burger{display:none;background:none;border:0;cursor:pointer;padding:8px}
+  .burger span{display:block;width:24px;height:2px;background:var(--navy);margin:5px 0;border-radius:2px}
+
+  /* ===== hero ===== */
+  .hero{
+    position:relative;overflow:hidden;
+    background:
+      radial-gradient(1100px 500px at 82% -10%, rgba(18,80,143,.10), transparent 60%),
+      linear-gradient(180deg,#fff, var(--bg));
+    padding:66px 0 74px;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+  .hero h1{font-size:clamp(34px,4.4vw,54px);letter-spacing:-.015em;margin:20px 0 20px}
+  .hero h1 .accent{color:var(--blue);font-style:italic}
+  .hero-sub{font-size:19px;color:var(--muted);max-width:520px;margin-bottom:30px}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:34px}
+  .trust-row{display:flex;gap:28px;flex-wrap:wrap;padding-top:26px;border-top:1px solid var(--line)}
+  .trust-item .num{font-family:var(--display);font-weight:700;font-size:28px;color:var(--navy);line-height:1}
+  .trust-item .lbl{font-size:13.5px;color:var(--muted);margin-top:5px;max-width:150px}
+
+  /* calculator */
+  .calc{
+    background:#fff;border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--shadow-lg);padding:30px;position:relative;
+  }
+  .calc::before{
+    content:"Розрахунок за 30 секунд";position:absolute;top:-13px;left:26px;
+    background:var(--navy);color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.04em;
+    padding:5px 14px;border-radius:20px;box-shadow:var(--shadow-sm);
+  }
+  .calc h3{font-size:21px;margin-bottom:4px}
+  .calc .calc-note{font-size:13.5px;color:var(--muted);margin-bottom:22px}
+  .field{margin-bottom:20px}
+  .field-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .field-top label{font-weight:600;font-size:14.5px;color:var(--ink)}
+  .field-val{font-family:var(--sans);font-weight:800;font-size:18px;color:var(--blue);font-variant-numeric:tabular-nums}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;
+    background:linear-gradient(90deg,var(--blue) var(--p,40%),var(--sky) var(--p,40%));cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;
+    border:5px solid var(--blue);box-shadow:0 2px 6px rgba(10,46,82,.25);cursor:pointer;margin-top:0;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:24px;height:24px;border-radius:50%;background:#fff;border:5px solid var(--blue);
+    box-shadow:0 2px 6px rgba(10,46,82,.25);cursor:pointer;
+  }
+  .calc-result{background:var(--sky);border-radius:14px;padding:20px;margin-top:6px}
+  .cr-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0}
+  .cr-row + .cr-row{border-top:1px dashed #cadcf0}
+  .cr-label{font-size:14.5px;color:var(--muted);max-width:58%}
+  .cr-value{font-family:var(--sans);font-weight:800;font-size:20px;color:var(--navy);font-variant-numeric:tabular-nums}
+  .cr-value.gold{color:var(--gold-deep)}
+  .cr-value.big{font-size:24px}
+  .calc .btn{width:100%;margin-top:18px}
+  .calc .disclaimer{font-size:12px;color:var(--muted);margin-top:12px;text-align:center}
+
+  /* ===== section base ===== */
+  section{padding:84px 0}
+  .sec-head{max-width:680px;margin-bottom:52px}
+  .sec-head.center{margin-inline:auto;text-align:center}
+  .sec-head h2{font-size:clamp(28px,3.4vw,40px);margin:16px 0 14px;letter-spacing:-.01em}
+  .sec-head p{color:var(--muted);font-size:18px}
+
+  /* how it works */
+  .how{background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .duo-card{
+    border:1px solid var(--line);border-radius:var(--r);padding:32px;background:var(--bg);position:relative;
+  }
+  .duo-card .tag{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+  .duo-card.save .tag{color:var(--gold-deep)}
+  .duo-card h3{font-size:22px;margin:12px 0 10px}
+  .duo-card p{color:var(--muted);font-size:15.5px}
+  .duo-icon{
+    width:52px;height:52px;border-radius:13px;display:grid;place-items:center;margin-bottom:18px;
+    background:var(--sky);color:var(--blue);
+  }
+  .duo-card.save .duo-icon{background:var(--gold-soft);color:var(--gold-deep)}
+  .duo-icon svg{width:26px;height:26px}
+  .plus-mid{display:flex;align-items:center;justify-content:center}
+
+  /* goals — 4 темы */
+  .goals-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+  .goal{
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;
+    transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+  }
+  .goal:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:#c6d8ec}
+  .goal .g-ic{width:50px;height:50px;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center;margin-bottom:18px}
+  .goal .g-ic svg{width:26px;height:26px}
+  .goal h3{font-size:19px;margin-bottom:10px}
+  .goal p{font-size:14.5px;color:var(--muted)}
+
+  /* benefits */
+  .benefits{background:var(--navy);color:#fff}
+  .benefits h2{color:#fff}
+  .benefits .sec-head p{color:#b9cbe0}
+  .ben-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .ben{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:26px}
+  .ben .b-ic{width:44px;height:44px;border-radius:11px;background:var(--gold);color:#241a06;display:grid;place-items:center;margin-bottom:16px}
+  .ben .b-ic svg{width:24px;height:24px}
+  .ben h3{color:#fff;font-size:18px;margin-bottom:8px}
+  .ben p{color:#b9cbe0;font-size:14.5px}
+
+  /* compare */
+  .compare-table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .compare-table th,.compare-table td{padding:18px 22px;text-align:left;font-size:15.5px;border-bottom:1px solid var(--line)}
+  .compare-table thead th{background:var(--sky);font-family:var(--sans);font-weight:700;color:var(--navy);font-size:15px}
+  .compare-table thead th:nth-child(2){color:var(--blue)}
+  .compare-table td:first-child{font-weight:600;color:var(--ink)}
+  .compare-table tbody tr:last-child td{border-bottom:0}
+  .compare-table .col-us{background:rgba(18,80,143,.04)}
+  .ic-yes{color:#1e9e6a;font-weight:800}
+  .ic-no{color:#b64949;font-weight:800}
+  .ic-part{color:var(--muted)}
+
+  /* steps */
+  .steps{background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;counter-reset:s}
+  .step{position:relative;padding:28px 22px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r)}
+  .step .n{
+    counter-increment:s;font-family:var(--display);font-weight:700;font-size:15px;
+    width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;margin-bottom:16px;
+  }
+  .step .n::before{content:"0" counter(s)}
+  .step h3{font-size:17px;margin-bottom:8px}
+  .step p{font-size:14px;color:var(--muted)}
+
+  /* testimonials */
+  .rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .rev{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:28px;box-shadow:var(--shadow-sm)}
+  .rev .stars{color:var(--gold);letter-spacing:2px;margin-bottom:14px}
+  .rev p{font-size:15.5px;color:var(--ink);margin-bottom:18px}
+  .rev .who{display:flex;align-items:center;gap:12px}
+  .rev .av{width:44px;height:44px;border-radius:50%;background:var(--sky);color:var(--blue);display:grid;place-items:center;font-weight:800}
+  .rev .who b{display:block;font-size:15px;color:var(--navy)}
+  .rev .who span{font-size:13px;color:var(--muted)}
+
+  /* faq */
+  .faq{max-width:820px;margin:0 auto}
+  details{background:#fff;border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+  summary{
+    list-style:none;cursor:pointer;padding:22px 24px;font-weight:700;font-size:17px;color:var(--navy);
+    display:flex;justify-content:space-between;align-items:center;gap:16px;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary .chev{flex:0 0 auto;width:22px;height:22px;transition:transform .25s ease;color:var(--blue)}
+  details[open] summary .chev{transform:rotate(180deg)}
+  details .ans{padding:0 24px 22px;color:var(--muted);font-size:15.5px}
+
+  /* lead / final cta */
+  .lead{background:linear-gradient(135deg,var(--blue-700),var(--blue))}
+  .lead .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center}
+  .lead h2{color:#fff;font-size:clamp(28px,3.4vw,40px);margin-bottom:16px}
+  .lead .lead-copy p{color:#cfe0f2;font-size:18px;margin-bottom:24px}
+  .lead ul{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+  .lead li{display:flex;gap:12px;align-items:flex-start;color:#eaf2fb;font-size:15.5px}
+  .lead li svg{flex:0 0 auto;width:22px;height:22px;color:var(--gold)}
+  .form-card{background:#fff;border-radius:20px;padding:32px;box-shadow:var(--shadow-lg)}
+  .form-card h3{font-size:22px;margin-bottom:6px}
+  .form-card .fc-note{font-size:14px;color:var(--muted);margin-bottom:22px}
+  .inp{margin-bottom:16px}
+  .inp label{display:block;font-size:14px;font-weight:600;margin-bottom:7px;color:var(--ink)}
+  .inp input,.inp select,.inp textarea{
+    width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:11px;
+    font-family:var(--sans);font-size:16px;color:var(--ink);background:var(--bg);transition:border-color .15s;
+  }
+  .inp textarea{resize:vertical;min-height:76px}
+  .inp select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:42px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235B6B80' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;}
+  .inp input:focus,.inp select:focus,.inp textarea:focus{border-color:var(--blue);outline:none;background:#fff}
+  .inp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:400px){.inp-row{grid-template-columns:1fr}}
+  .consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:6px 0 18px}
+  .consent input{margin-top:3px}
+  .form-msg{display:none;background:var(--sky);color:var(--blue-700);padding:14px;border-radius:11px;font-weight:600;font-size:15px;text-align:center;margin-top:12px}
+
+  /* footer */
+  footer{background:#081F39;color:#9fb4cc;padding:60px 0 30px;font-size:14.5px}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:36px;border-bottom:1px solid rgba(255,255,255,.1)}
+  footer .logo{color:#fff;margin-bottom:14px}
+  footer h4{color:#fff;font-family:var(--sans);font-size:14px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 16px}
+  footer a{display:block;margin-bottom:10px;color:#9fb4cc}
+  footer a:hover{color:#fff}
+  .foot-bottom{padding-top:24px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13px;color:#7690ad}
+  .foot-legal{max-width:760px;margin-top:14px;font-size:12px;color:#6b83a0;line-height:1.6}
+
+  /* reveal animation */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ===== responsive ===== */
+  @media (max-width:940px){
+    .hero-grid,.lead .wrap{grid-template-columns:1fr;gap:40px}
+    .goals-grid,.ben-grid,.steps-grid,.rev-grid{grid-template-columns:1fr 1fr}
+    .nav-links,.nav-phone{display:none}
+    .burger{display:block}
+    .duo{grid-template-columns:1fr}
+    .plus-mid{transform:rotate(90deg)}
+  }
+  @media (max-width:600px){
+    body{font-size:16px}
+    section{padding:60px 0}
+    .wrap{padding:0 18px}
+    .goals-grid,.ben-grid,.steps-grid,.rev-grid{grid-template-columns:1fr}
+    .hero{padding:44px 0 54px}
+    .trust-row{gap:20px}
+    .compare-table th,.compare-table td{padding:13px 12px;font-size:13.5px}
+    .calc{padding:24px 20px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{scroll-behavior:auto!important}
+    .reveal{opacity:1;transform:none;transition:none}
+    .btn,.goal{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header>
+  <div class="wrap nav">
+    <a href="#" class="logo" aria-label="На головну"><!-- Місце для логотипу/назви, якщо знадобиться --></a>
+    <nav class="nav-links">
+      <a href="#how">Як це працює</a>
+      <a href="#goals">Для чого</a>
+      <a href="#compare">Порівняння</a>
+      <a href="#faq">Питання</a>
+    </nav>
+    <div class="nav-right">
+      <a href="tel:+380995524257" class="nav-phone">+380 99 552 42 57</a>
+      <a href="#lead" class="btn btn-primary" style="padding:11px 22px;font-size:15px">Консультація</a>
+      <button class="burger" aria-label="Меню" onclick="document.querySelector('.nav-links').style.display='flex'"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Накопичувальне страхування життя</span>
+      <h1>Захист сьогодні і <span class="accent">капітал</span> на майбутнє — в одному договорі</h1>
+      <p class="hero-sub">Ви щороку відкладаєте посильну суму. Гроші працюють за складним відсотком і повертаються вам капіталом наприкінці строку. А ваша родина захищена фінансово з першого дня.</p>
+      <div class="hero-cta">
+        <a href="#lead" class="btn btn-primary">Отримати розрахунок</a>
+        <a href="#how" class="btn btn-ghost">Як це працює</a>
+      </div>
+      <div class="trust-row">
+        <div class="trust-item"><div class="num">18+</div><div class="lbl">років на ринку страхування</div></div>
+        <div class="trust-item"><div class="num">12 000+</div><div class="lbl">клієнтів довірили капітал</div></div>
+        <div class="trust-item"><div class="num">Ліцензія НБУ</div><div class="lbl">діяльність під наглядом регулятора</div></div>
+      </div>
+    </div>
+
+    <!-- SIGNATURE: калькулятор накопичення -->
+    <div class="calc" id="calc">
+      <h3>Скільки ви накопичите?</h3>
+      <p class="calc-note">Посуньте повзунки — і побачите орієнтовний результат за складним відсотком.</p>
+
+      <div class="field">
+        <div class="field-top">
+          <label for="annual">Річний внесок</label>
+          <span class="field-val" id="annualVal">25 000 грн</span>
+        </div>
+        <input type="range" id="annual" min="10000" max="100000" step="5000" value="25000" aria-label="Річний внесок">
+      </div>
+
+      <div class="field">
+        <div class="field-top">
+          <label for="term">Строк накопичення</label>
+          <span class="field-val" id="termVal">20 років</span>
+        </div>
+        <input type="range" id="term" min="5" max="30" step="1" value="20" aria-label="Строк накопичення">
+      </div>
+
+      <div class="calc-result">
+        <div class="cr-row">
+          <span class="cr-label">Ви вкладете за весь строк</span>
+          <span class="cr-value" id="rTotal">500 000 грн</span>
+        </div>
+        <div class="cr-row">
+          <span class="cr-label">Інвестиційний дохід <span style="color:var(--gold-deep);font-weight:700">(складний %)</span></span>
+          <span class="cr-value gold" id="rIncome">— грн</span>
+        </div>
+        <div class="cr-row">
+          <span class="cr-label">Капітал наприкінці <span style="color:var(--muted);font-weight:600">(орієнтовно)</span></span>
+          <span class="cr-value big" id="rCapital">— грн</span>
+        </div>
+        <div class="cr-row">
+          <span class="cr-label">Страховий захист з 1-го дня</span>
+          <span class="cr-value" id="rCover">— грн</span>
+        </div>
+      </div>
+
+      <a href="#lead" class="btn btn-gold">Розрахувати точні умови</a>
+      <p class="disclaimer">Розрахунок орієнтовний. Точні гарантована та інвестиційна дохідність — у договорі.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow" style="justify-content:center">Один продукт — дві функції</span>
+      <h2>Ви одночасно і накопичуєте, і захищаєте себе</h2>
+      <p>Це головна відмінність від звичайного депозиту: гроші працюють на майбутнє, а страховий захист діє вже з першого внеску.</p>
+    </div>
+    <div class="duo">
+      <div class="duo-card">
+        <div class="duo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <span class="tag">Захист</span>
+        <h3>Фінансова безпека родини</h3>
+        <p>Якщо з вами щось трапиться, близькі отримають повну страхову суму — незалежно від того, скільки внесків ви вже встигли зробити.</p>
+      </div>
+      <div class="duo-card save">
+        <div class="duo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div>
+        <span class="tag">Накопичення</span>
+        <h3>Капітал, що зростає</h3>
+        <p>Регулярні внески працюють за складним відсотком: дохід нараховується не лише на внески, а й на вже накопичений дохід. Що довший строк — то помітніший результат.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GOALS — 4 темы ===================== -->
+<section id="goals">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow" style="justify-content:center">Для яких цілей</span>
+      <h2>Одна програма — під різні життєві завдання</h2>
+      <p>Ви самі визначаєте мету, суму й строк. Ми підбираємо програму під ваш бюджет.</p>
+    </div>
+    <div class="goals-grid">
+      <div class="goal">
+        <div class="g-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Захист сім'ї</h3>
+        <p>Впевненість, що близькі будуть фінансово захищені за будь-яких обставин — головний мотив для більшості клієнтів.</p>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg></div>
+        <h3>Фінансова подушка</h3>
+        <p>Дисциплінований спосіб відкладати без спокуси витратити. Накопичення на майбутнє, до якого важко «залізти» щодня.</p>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></div>
+        <h3>Капітал на пенсію</h3>
+        <p>Додаткове джерело доходу на старість, яке ви формуєте самостійно й не залежите тільки від державної пенсії.</p>
+      </div>
+      <div class="goal">
+        <div class="g-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg></div>
+        <h3>Освіта дітей</h3>
+        <p>До повноліття дитини у вас накопичується сума на навчання — навіть якщо життєві обставини зміняться.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BENEFITS ===================== -->
+<section class="benefits">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow" style="justify-content:center;color:var(--gold)">Чому це вигідно</span>
+      <h2>Переваги накопичувального страхування</h2>
+      <p>Поєднання, якого не дає ні депозит, ні звичайний поліс окремо.</p>
+    </div>
+    <div class="ben-grid">
+      <div class="ben">
+        <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <h3>Захист з першого дня</h3>
+        <p>Повна страхова сума діє одразу, а не «накопичується» роками.</p>
+      </div>
+      <div class="ben">
+        <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h3>Гарантована виплата</h3>
+        <p>Ви отримуєте накопичену суму наприкінці строку — це прописано в договорі.</p>
+      </div>
+      <div class="ben">
+        <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h3>Податкова знижка</h3>
+        <p>За договорами страхування життя можна повертати частину сплаченого ПДФО.*</p>
+      </div>
+      <div class="ben">
+        <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div>
+        <h3>Дисципліна накопичення</h3>
+        <p>Регулярні внески формують звичку відкладати системно, а не «як вийде».</p>
+      </div>
+      <div class="ben">
+        <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
+        <h3>Гнучкі умови</h3>
+        <p>Сума, строк і періодичність внесків підбираються під ваш бюджет.</p>
+      </div>
+      <div class="ben">
+        <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Нагляд регулятора</h3>
+        <p>Діяльність страховика ліцензована та контролюється Національним банком України.</p>
+      </div>
+    </div>
+    <p style="color:#8ba4c0;font-size:12.5px;margin-top:22px;text-align:center">*Умови податкової знижки визначаються чинним законодавством. Уточнюйте деталі у консультанта.</p>
+  </div>
+</section>
+
+<!-- ===================== COMPARE ===================== -->
+<section id="compare">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow" style="justify-content:center">Чесне порівняння</span>
+      <h2>Депозит чи накопичувальне страхування?</h2>
+      <p>У кожного інструмента своя роль. Ось у чому різниця для довгострокової мети.</p>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Критерій</th>
+            <th class="col-us">Накопичувальне страхування</th>
+            <th>Банківський депозит</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Захист життя та здоров'я</td><td class="col-us"><span class="ic-yes">Так, з 1-го дня</span></td><td><span class="ic-no">Немає</span></td></tr>
+          <tr><td>Накопичення капіталу</td><td class="col-us"><span class="ic-yes">Так</span></td><td><span class="ic-yes">Так</span></td></tr>
+          <tr><td>Дисципліна внесків</td><td class="col-us"><span class="ic-yes">Регулярні платежі</span></td><td><span class="ic-part">На власний розсуд</span></td></tr>
+          <tr><td>Податкова знижка ПДФО</td><td class="col-us"><span class="ic-yes">Можлива</span></td><td><span class="ic-no">Немає</span></td></tr>
+          <tr><td>Виплата родині при страховому випадку</td><td class="col-us"><span class="ic-yes">Повна страхова сума</span></td><td><span class="ic-part">Лише накопичене</span></td></tr>
+          <tr><td>Горизонт</td><td class="col-us">Довгострокова ціль (5–30 років)</td><td>Коротко- та середньострокова</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STEPS ===================== -->
+<section class="steps">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow" style="justify-content:center">Як почати</span>
+      <h2>Оформлення — за 4 прості кроки</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step"><div class="n"></div><h3>Заявка</h3><p>Залиште контакти — консультант зв'яжеться у зручний час.</p></div>
+      <div class="step"><div class="n"></div><h3>Розрахунок</h3><p>Разом визначаємо мету, суму та строк під ваш бюджет.</p></div>
+      <div class="step"><div class="n"></div><h3>Договір</h3><p>Підписуєте прозорий договір без прихованих умов.</p></div>
+      <div class="step"><div class="n"></div><h3>Накопичення</h3><p>Робите внески — капітал зростає, захист діє.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIALS ===================== -->
+<section id="reviews">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow" style="justify-content:center">Відгуки</span>
+      <h2>Що кажуть наші клієнти</h2>
+      <p style="color:var(--gold-deep);font-weight:600;font-size:15px">↓ Заміни на реальні відгуки клієнтів ↓</p>
+    </div>
+    <div class="rev-grid">
+      <div class="rev">
+        <div class="stars">★★★★★</div>
+        <p>«Оформила програму на навчання доньки. Спокійно, що сума накопичиться незалежно від обставин. Все прозоро пояснили.»</p>
+        <div class="who"><div class="av">О</div><div><b>Оксана М.</b><span>клієнтка</span></div></div>
+      </div>
+      <div class="rev">
+        <div class="stars">★★★★★</div>
+        <p>«Довго обирав між депозитом і страхуванням. Тут отримую і накопичення, і захист родини одночасно — саме те, що шукав.»</p>
+        <div class="who"><div class="av">В</div><div><b>Володимир К.</b><span>клієнт</span></div></div>
+      </div>
+      <div class="rev">
+        <div class="stars">★★★★★</div>
+        <p>«Внески посильні, консультант підібрав програму під мій бюджет. Формую собі капітал на пенсію без стресу.»</p>
+        <div class="who"><div class="av">І</div><div><b>Ірина Д.</b><span>клієнтка</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section class="how" id="faq">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow" style="justify-content:center">Питання та відповіді</span>
+      <h2>Що зазвичай запитують</h2>
+    </div>
+    <div class="faq">
+      <details open>
+        <summary>Чи безпечно це? Хто гарантує мої гроші?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="ans">Діяльність страхової компанії ліцензована та перебуває під наглядом Національного банку України. Умови виплат і зобов'язання страховика чітко фіксуються в договорі.</div>
+      </details>
+      <details>
+        <summary>Чим це відрізняється від банківського депозиту?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="ans">Депозит лише накопичує. Накопичувальне страхування додатково дає фінансовий захист родини з першого дня та можливість податкової знижки. Це інструмент для довгострокових цілей.</div>
+      </details>
+      <details>
+        <summary>Що буде, якщо я тимчасово не зможу платити?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="ans">У договорах передбачені пільгові періоди та варіанти врегулювання. Конкретні умови залежать від обраної програми — консультант розкаже деталі до підписання.</div>
+      </details>
+      <details>
+        <summary>А що з інфляцією? Гроші не «згорять»?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="ans">Крім гарантованої суми, на внески нараховується інвестиційний дохід. Умови індексації та дохідності залежать від програми — розберемо їх на консультації.</div>
+      </details>
+      <details>
+        <summary>Коли і як я отримаю накопичену суму?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="ans">Наприкінці строку договору ви отримуєте накопичений капітал разом з інвестиційним доходом. У разі страхового випадку виплата здійснюється згідно з умовами договору.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LEAD / FINAL CTA ===================== -->
+<section class="lead" id="lead">
+  <div class="wrap">
+    <div class="lead-copy">
+      <h2>Отримайте персональний розрахунок безкоштовно</h2>
+      <p>Залиште контакти — консультант підбере програму під вашу мету та бюджет. Без зобов'язань.</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Розрахунок під вашу суму та строк</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Пояснимо всі умови простою мовою</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Жодного тиску — рішення за вами</li>
+      </ul>
+    </div>
+    <div class="form-card">
+      <h3>Запис на консультацію</h3>
+      <p class="fc-note">Консультація безкоштовна, без зобовʼязань. Передзвонимо протягом робочого дня.</p>
+      <form id="leadForm" novalidate>
+        <div class="inp"><label for="name">Ім'я</label><input type="text" id="name" name="name" placeholder="Ваше ім'я" required></div>
+        <div class="inp"><label for="phone">Телефон</label><input type="tel" id="phone" name="phone" placeholder="+380 __ ___ __ __" required></div>
+        <div class="inp"><label for="service">Що вас цікавить</label>
+          <select id="service" name="service">
+            <option>Захист сім'ї</option>
+            <option>Накопичення / фінансова подушка</option>
+            <option>Капітал на пенсію</option>
+            <option>Освіта дітей</option>
+            <option selected>Інше (загальне запитання)</option>
+          </select>
+        </div>
+        <div class="inp-row">
+          <div class="inp"><label for="cdate">Зручна дата дзвінка</label><input type="date" id="cdate" name="cdate"></div>
+          <div class="inp"><label for="ctime">Час</label>
+            <select id="ctime" name="ctime">
+              <option value="">— оберіть —</option>
+              <option>09:00 – 12:00</option>
+              <option>12:00 – 15:00</option>
+              <option>15:00 – 18:00</option>
+              <option>18:00 – 21:00</option>
+            </select>
+          </div>
+        </div>
+        <div class="inp"><label for="comment">Коментар</label><textarea id="comment" name="comment" rows="3" placeholder="Коротко опишіть запит (необовʼязково)"></textarea></div>
+        <label class="consent"><input type="checkbox" id="agree" required> Я погоджуюсь на обробку персональних даних і ознайомлений з політикою конфіденційності.</label>
+        <button type="submit" class="btn btn-gold" style="width:100%">Записатися на консультацію</button>
+        <div class="form-msg" id="formMsg">Дякуємо! Ми зв'яжемося з вами найближчим часом.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <p style="max-width:340px">Накопичувальне страхування життя: захист родини та формування капіталу на ваші довгострокові цілі.</p>
+      </div>
+      <div>
+        <h4>Навігація</h4>
+        <a href="#how">Як це працює</a>
+        <a href="#goals">Для чого</a>
+        <a href="#compare">Порівняння</a>
+        <a href="#faq">Питання</a>
+      </div>
+      <div>
+        <h4>Контакти</h4>
+        <a href="tel:+380995524257">+380 99 552 42 57</a>
+        <a href="https://maps.google.com/?q=Ужгород, вул. Швабська, 12б" target="_blank" rel="noopener">Ужгород, вул. Швабська, 12б</a>
+        <a href="#">Instagram · Facebook · Telegram</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026. Усі права захищені.</span>
+      <span>Політика конфіденційності · Договір публічної оферти</span>
+    </div>
+    <p class="foot-legal">Інформація на сайті має ознайомлювальний характер і не є публічною офертою. Розрахунки орієнтовні; точні умови, гарантована та інвестиційна дохідність, порядок виплат визначаються договором страхування. Страхування життя здійснює ліцензована страхова компанія під наглядом Національного банку України.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var RATE = 0.07; // ⚙️ Річна дохідність (складний %), нетто для клієнта. Заміни під реальні умови.
+
+  var annual = document.getElementById('annual');
+  var term   = document.getElementById('term');
+  var aVal = document.getElementById('annualVal');
+  var tVal = document.getElementById('termVal');
+  var rTotal = document.getElementById('rTotal');
+  var rIncome = document.getElementById('rIncome');
+  var rCapital = document.getElementById('rCapital');
+  var rCover = document.getElementById('rCover');
+
+  var fmt = new Intl.NumberFormat('uk-UA');
+  function money(n){ return fmt.format(Math.round(n)) + ' грн'; }
+
+  function yearsWord(n){
+    var t = n % 10, h = n % 100;
+    if(t===1 && h!==11) return 'рік';
+    if(t>=2 && t<=4 && (h<12||h>14)) return 'роки';
+    return 'років';
+  }
+
+  function paintRange(el){
+    var min=+el.min, max=+el.max, v=+el.value;
+    var p = ((v-min)/(max-min))*100;
+    el.style.setProperty('--p', p + '%');
+  }
+
+  // плавна анімація числа
+  function animateNum(el, to){
+    if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){ el.textContent = money(to); return; }
+    var from = el._val || 0, start = null, dur = 450;
+    function step(ts){
+      if(!start) start = ts;
+      var k = Math.min((ts-start)/dur, 1);
+      var e = 1 - Math.pow(1-k, 3);
+      el.textContent = money(from + (to-from)*e);
+      if(k<1) requestAnimationFrame(step);
+    }
+    el._val = to;
+    requestAnimationFrame(step);
+  }
+
+  function calc(){
+    var a = +annual.value;       // річний внесок
+    var y = +term.value;         // строк, років
+    var total = a*y;             // всього внесків
+
+    // майбутня вартість річних внесків за складним відсотком (ануїтет, внесок у кінці року)
+    var r = RATE;
+    var capital = r>0 ? a*((Math.pow(1+r,y)-1)/r) : total;
+    var income = capital - total; // інвестиційний дохід зверху
+
+    // страховий захист з 1-го дня = цільова сума (весь запланований капітал)
+    var cover = total;
+
+    aVal.textContent = fmt.format(a) + ' грн';
+    tVal.textContent = y + ' ' + yearsWord(y);
+    rTotal.textContent = money(total); rTotal._val = total;
+    rCover.textContent = money(cover); rCover._val = cover;
+
+    animateNum(rIncome, income);
+    animateNum(rCapital, capital);
+
+    paintRange(annual); paintRange(term);
+  }
+
+  annual.addEventListener('input', calc);
+  term.addEventListener('input', calc);
+  calc();
+
+  // reveal on scroll
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); obs.unobserve(en.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('section .sec-head, .duo-card, .goal, .ben, .step, .rev, .calc, .form-card').forEach(function(el){
+    el.classList.add('reveal'); obs.observe(el);
+  });
+
+  // Надсилання заявки на бекенд (/api/lead), який шле сповіщення в Telegram
+  document.getElementById('leadForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var name = document.getElementById('name');
+    var phone = document.getElementById('phone');
+    var agree = document.getElementById('agree');
+    var msg = document.getElementById('formMsg');
+    var btn = this.querySelector('button[type=submit]');
+
+    // скидання підсвітки помилок
+    name.style.borderColor=''; phone.style.borderColor=''; agree.parentElement.style.color='';
+
+    if(!name.value.trim() || !phone.value.trim() || !agree.checked){
+      if(!name.value.trim()) name.style.borderColor='#b64949';
+      if(!phone.value.trim()) phone.style.borderColor='#b64949';
+      if(!agree.checked) agree.parentElement.style.color='#b64949';
+      return;
+    }
+
+    var oldText = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Надсилаємо…';
+    msg.style.display='none';
+
+    var payload = {
+      name: name.value.trim(),
+      phone: phone.value.trim(),
+      service: document.getElementById('service').value,
+      cdate: document.getElementById('cdate').value,
+      ctime: document.getElementById('ctime').value,
+      comment: document.getElementById('comment').value.trim()
+    };
+
+    try{
+      var r = await fetch('/api/lead', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      var d = await r.json().catch(function(){return {};});
+      if(!r.ok || !d.ok) throw new Error();
+
+      msg.textContent = "Дякуємо! Ми зв'яжемося з вами найближчим часом.";
+      msg.style.background='var(--sky)'; msg.style.color='var(--blue-700)';
+      msg.style.display='block';
+      this.reset();
+    }catch(err){
+      msg.textContent = 'Не вдалося надіслати. Зателефонуйте нам: +380 99 552 42 57';
+      msg.style.background='#fdecec'; msg.style.color='#b64949';
+      msg.style.display='block';
+    }finally{
+      btn.disabled=false; btn.textContent=oldText;
+    }
+  });
+})();
+</script>
+</body>
+</html>
