@@ -6,6 +6,23 @@
 <title>Накопичувальне страхування життя</title>
 <meta name="description" content="Захист життя та накопичення капіталу в одному продукті. Безкоштовна консультація і розрахунок.">
 
+<!-- ============ META PIXEL ============
+     ВСТАВ свій Pixel ID у рядок нижче (window.META_PIXEL_ID).
+     Поки там 'PIXEL_ID' — піксель вимкнено і сайт працює як звичайно. -->
+<script>
+  window.META_PIXEL_ID = '1434234514890585'; // Pixel ID (Meta)
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,
+  'script','https://connect.facebook.net/en_US/fbevents.js');
+  if (window.META_PIXEL_ID && window.META_PIXEL_ID !== 'PIXEL_ID') {
+    fbq('init', window.META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }
+</script>
+<!-- ============ /META PIXEL ============ -->
+
 <!--
 ==========================================================================
   ЗАГЛУШКИ ДЛЯ ЗАМІНИ (шукай по тексту):
@@ -640,7 +657,7 @@
           </div>
         </div>
         <div class="inp"><label for="comment">Коментар</label><textarea id="comment" name="comment" rows="3" placeholder="Коротко опишіть запит (необовʼязково)"></textarea></div>
-        <label class="consent"><input type="checkbox" id="agree" required> Я погоджуюсь на обробку персональних даних і ознайомлений з політикою конфіденційності.</label>
+        <label class="consent"><input type="checkbox" id="agree" required> Я погоджуюсь на обробку персональних даних відповідно до <a href="privacy.html" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600">Політики конфіденційності</a>.</label>
         <button type="submit" class="btn btn-gold" style="width:100%">Записатися на консультацію</button>
         <div class="form-msg" id="formMsg">Дякуємо! Ми зв'яжемося з вами найближчим часом.</div>
       </form>
@@ -671,7 +688,7 @@
     </div>
     <div class="foot-bottom">
       <span>© 2026. Усі права захищені.</span>
-      <span>Політика конфіденційності · Договір публічної оферти</span>
+      <span><a href="privacy.html" style="color:#9fb4cc">Політика конфіденційності</a></span>
     </div>
     <p class="foot-legal">Інформація на сайті має ознайомлювальний характер і не є публічною офертою. Розрахунки орієнтовні; точні умови, гарантована та інвестиційна дохідність, порядок виплат визначаються договором страхування. Страхування життя здійснює ліцензована страхова компанія під наглядом Національного банку України.</p>
   </div>
@@ -797,6 +814,11 @@
       });
       var d = await r.json().catch(function(){return {};});
       if(!r.ok || !d.ok) throw new Error();
+
+      // Meta Pixel: подія "Lead" — успішна заявка (те, що оптимізує реклама)
+      if (window.fbq && window.META_PIXEL_ID && window.META_PIXEL_ID !== 'PIXEL_ID') {
+        fbq('track', 'Lead');
+      }
 
       msg.textContent = "Дякуємо! Ми зв'яжемося з вами найближчим часом.";
       msg.style.background='var(--sky)'; msg.style.color='var(--blue-700)';
